@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Chat</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #chat { display: none; }
+        #messages { border: 1px solid #ccc; padding: 10px; height: 200px; overflow-y: scroll; }
+        #input { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Private Chat</h1>
+    <div id="login">
+        <input type="text" id="key" placeholder="Enter your key">
+        <button onclick="joinChat()">Join Chat</button>
+    </div>
+    <div id="chat">
+        <div id="messages"></div>
+        <div id="input">
+            <input type="text" id="message" placeholder="Enter your message">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    <script>
+        let socket;
+
+        function joinChat() {
+            const key = document.getElementById('key').value;
+            socket = new WebSocket(`wss://your_backend_server/${key}`);
+
+            socket.onopen = () => {
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('chat').style.display = 'block';
+            };
+
+            socket.onmessage = (event) => {
+                const messages = document.getElementById('messages');
+                messages.innerHTML += `<div>${event.data}</div>`;
+                messages.scrollTop = messages.scrollHeight;
+            };
+
+            socket.onclose = () => {
+                alert('Chat room is full or connection closed.');
+                document.getElementById('login').style.display = 'block';
+                document.getElementById('chat').style.display = 'none';
+            };
+        }
+
+        function sendMessage() {
+            const message = document.getElementById('message').value;
+            socket.send(message);
+            document.getElementById('message').value = '';
+        }
+    </script>
+</body>
+</html>
